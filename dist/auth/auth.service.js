@@ -19,7 +19,7 @@ const jwt_1 = require("@nestjs/jwt");
 const typeorm_2 = require("typeorm");
 const bcrypt = require("bcrypt");
 const user_entity_1 = require("../users/user.entity");
-const otp_entity_1 = require("./otp.entity");
+const otp_entity_1 = require("./entities/otp.entity");
 const sms_service_1 = require("../sms/sms.service");
 const OTP_VALIDITE_MINUTES = 5;
 const OTP_TENTATIVES_MAX = 5;
@@ -32,11 +32,14 @@ let AuthService = class AuthService {
     }
     async register(dto) {
         const existant = await this.users.findOne({
-            where: [{ telephone: dto.telephone }, { nomUtilisateur: dto.nomUtilisateur }],
+            where: [
+                { telephone: dto.telephone },
+                { nomUtilisateur: dto.nomUtilisateur },
+            ],
         });
         if (existant) {
             throw new common_1.ConflictException(existant.telephone === dto.telephone
-                ? 'Ce numéro de téléphone est déjà utilisé'
+                ? "Ce numéro de téléphone est déjà utilisé"
                 : "Ce nom d'utilisateur est déjà pris");
         }
         const user = this.users.create({
@@ -46,12 +49,14 @@ let AuthService = class AuthService {
         });
         await this.users.save(user);
         await this.envoyerOtp(dto.telephone);
-        return { message: 'Compte créé. Un code de vérification a été envoyé par SMS.' };
+        return {
+            message: "Compte créé. Un code de vérification a été envoyé par SMS.",
+        };
     }
     async envoyerOtp(telephone) {
         const user = await this.users.findOne({ where: { telephone } });
         if (!user)
-            throw new common_1.BadRequestException('Aucun compte avec ce numéro');
+            throw new common_1.BadRequestException("Aucun compte avec ce numéro");
         const code = Math.floor(1000 + Math.random() * 9000).toString();
         const otp = this.otps.create({
             telephone,
@@ -60,7 +65,7 @@ let AuthService = class AuthService {
         });
         await this.otps.save(otp);
         await this.sms.envoyer(telephone, `Budget FCFA : votre code de vérification est ${code}. Valable ${OTP_VALIDITE_MINUTES} minutes.`);
-        return { message: 'Code envoyé par SMS.' };
+        return { message: "Code envoyé par SMS." };
     }
     async verifierOtp(dto) {
         const otp = await this.otps.findOne({
@@ -69,36 +74,43 @@ let AuthService = class AuthService {
                 utilise: false,
                 expireLe: (0, typeorm_2.MoreThan)(new Date()),
             },
-            order: { creeLe: 'DESC' },
+            order: { creeLe: "DESC" },
         });
         if (!otp)
-            throw new common_1.BadRequestException('Code expiré ou introuvable. Demande un nouveau code.');
+            throw new common_1.BadRequestException("Code expiré ou introuvable. Demande un nouveau code.");
         if (otp.tentatives >= OTP_TENTATIVES_MAX) {
-            throw new common_1.BadRequestException('Trop de tentatives. Demande un nouveau code.');
+            throw new common_1.BadRequestException("Trop de tentatives. Demande un nouveau code.");
         }
         const valide = await bcrypt.compare(dto.code, otp.codeHash);
         if (!valide) {
             otp.tentatives += 1;
             await this.otps.save(otp);
-            throw new common_1.BadRequestException('Code incorrect');
+            throw new common_1.BadRequestException("Code incorrect");
         }
         otp.utilise = true;
         await this.otps.save(otp);
-        const user = await this.users.findOne({ where: { telephone: dto.telephone } });
+        const user = await this.users.findOne({
+            where: { telephone: dto.telephone },
+        });
         if (!user)
-            throw new common_1.BadRequestException('Compte introuvable');
+            throw new common_1.BadRequestException("Compte introuvable");
         user.telephoneVerifie = true;
         await this.users.save(user);
         return this.emettreToken(user);
     }
     async login(dto) {
-        const user = await this.users.findOne({ where: { telephone: dto.telephone } });
+        const user = await this.users.findOne({
+            where: { telephone: dto.telephone },
+        });
         if (!user || !(await bcrypt.compare(dto.motDePasse, user.motDePasseHash))) {
-            throw new common_1.UnauthorizedException('Téléphone ou mot de passe incorrect');
+            throw new common_1.UnauthorizedException("Téléphone ou mot de passe incorrect");
         }
         if (!user.telephoneVerifie) {
             await this.envoyerOtp(user.telephone);
-            return { verificationRequise: true, message: 'Numéro non vérifié. Un code a été envoyé.' };
+            return {
+                verificationRequise: true,
+                message: "Numéro non vérifié. Un code a été envoyé.",
+            };
         }
         return this.emettreToken(user);
     }

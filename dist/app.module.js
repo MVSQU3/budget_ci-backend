@@ -12,7 +12,7 @@ const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const auth_module_1 = require("./auth/auth.module");
 const user_entity_1 = require("./users/user.entity");
-const otp_entity_1 = require("./auth/otp.entity");
+const otp_entity_1 = require("./auth/entities/otp.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -23,12 +23,12 @@ exports.AppModule = AppModule = __decorate([
             typeorm_1.TypeOrmModule.forRootAsync({
                 inject: [config_1.ConfigService],
                 useFactory: (config) => ({
-                    type: 'postgres',
-                    host: config.get('DATABASE_HOST', 'localhost'),
-                    port: parseInt(config.get('DATABASE_PORT', '5432'), 10),
-                    username: config.get('DATABASE_USER', 'postgres'),
-                    password: config.get('DATABASE_PASSWORD', 'postgres'),
-                    database: config.get('DATABASE_NAME', 'budget_fcfa'),
+                    type: "postgres",
+                    host: config.get("DATABASE_HOST", "localhost"),
+                    port: parseInt(config.get("DATABASE_PORT", "5432"), 10),
+                    username: config.get("DATABASE_USER", "postgres"),
+                    password: config.get("DATABASE_PASSWORD", "postgres"),
+                    database: config.get("DATABASE_NAME", "budget_fcfa"),
                     entities: [user_entity_1.User, otp_entity_1.Otp],
                     synchronize: true,
                 }),

@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Transaction } from './transaction.entity';
-import { Budget } from './budget.entity';
-import { SyncDto } from './sync.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Transaction } from "./entities/transaction.entity";
+import { Budget } from "./entities/budget.entity";
+import { SyncDto } from "./dto/sync.dto";
 
 /**
  * Synchronisation offline-first :
@@ -14,7 +14,8 @@ import { SyncDto } from './sync.dto';
 @Injectable()
 export class SyncService {
   constructor(
-    @InjectRepository(Transaction) private readonly txs: Repository<Transaction>,
+    @InjectRepository(Transaction)
+    private readonly txs: Repository<Transaction>,
     @InjectRepository(Budget) private readonly budgets: Repository<Budget>,
   ) {}
 
@@ -29,7 +30,7 @@ export class SyncService {
           type: t.type,
           montant: Math.round(t.montant),
           categorieId: t.categorieId,
-          note: t.note || '',
+          note: t.note || "",
           date: t.date,
           supprime: !!t.supprime,
           majLe: t.majLe,
@@ -54,7 +55,7 @@ export class SyncService {
 
     // 3. Renvoyer l'état complet (y compris tombstones, pour propager les suppressions)
     const [transactions, tousBudgets] = await Promise.all([
-      this.txs.find({ where: { userId }, order: { date: 'DESC' } }),
+      this.txs.find({ where: { userId }, order: { date: "DESC" } }),
       this.budgets.find({ where: { userId } }),
     ]);
 

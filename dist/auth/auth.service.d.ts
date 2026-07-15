@@ -1,9 +1,9 @@
-import { JwtService } from '@nestjs/jwt';
-import { Repository } from 'typeorm';
-import { User } from '../users/user.entity';
-import { Otp } from './otp.entity';
-import { SmsService } from '../sms/sms.service';
-import { LoginDto, RegisterDto, VerifyOtpDto } from './dto/auth.dto';
+import { JwtService } from "@nestjs/jwt";
+import { Repository } from "typeorm";
+import { User } from "../users/user.entity";
+import { Otp } from "./entities/otp.entity";
+import { SmsService } from "../sms/sms.service";
+import { LoginDto, RegisterDto, VerifyOtpDto } from "./dto/auth.dto";
 export declare class AuthService {
     private readonly users;
     private readonly otps;

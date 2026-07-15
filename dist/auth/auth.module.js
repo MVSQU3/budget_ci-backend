@@ -13,7 +13,7 @@ const jwt_1 = require("@nestjs/jwt");
 const passport_1 = require("@nestjs/passport");
 const typeorm_1 = require("@nestjs/typeorm");
 const user_entity_1 = require("../users/user.entity");
-const otp_entity_1 = require("./otp.entity");
+const otp_entity_1 = require("./entities/otp.entity");
 const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
 const jwt_strategy_1 = require("./jwt.strategy");
@@ -29,8 +29,8 @@ exports.AuthModule = AuthModule = __decorate([
             jwt_1.JwtModule.registerAsync({
                 inject: [config_1.ConfigService],
                 useFactory: (config) => ({
-                    secret: config.get('JWT_SECRET', 'dev-secret'),
-                    signOptions: { expiresIn: config.get('JWT_EXPIRES_IN', '7d') },
+                    secret: config.get("JWT_SECRET", "dev-secret"),
+                    signOptions: { expiresIn: config.get("JWT_EXPIRES_IN", "7d") },
                 }),
             }),
         ],
