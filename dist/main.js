@@ -7,7 +7,7 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors();
     app.useGlobalPipes(new common_1.ValidationPipe({ whitelist: true, transform: true }));
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT || 3002;
     await app.listen(port);
     console.log(`API démarrée sur http://localhost:${port}`);
 }
