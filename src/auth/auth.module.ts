@@ -9,9 +9,11 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./jwt.strategy";
 import { SmsService } from "../sms/sms.service";
+import { BillingModule } from "../billing/billing.module";
 
 @Module({
   imports: [
+    BillingModule, // ouvre la période d'essai à l'inscription
     TypeOrmModule.forFeature([User, Otp]),
     PassportModule,
     JwtModule.registerAsync({

@@ -11,6 +11,7 @@ import * as bcrypt from "bcrypt";
 import { User } from "../users/user.entity";
 import { Otp } from "./entities/otp.entity";
 import { SmsService } from "../sms/sms.service";
+import { AbonnementsService } from "../billing/abonnements.service";
 import { LoginDto, RegisterDto, VerifyOtpDto } from "./dto/auth.dto";
 
 const OTP_VALIDITE_MINUTES = 5;
@@ -23,10 +24,13 @@ export class AuthService {
     @InjectRepository(Otp) private readonly otps: Repository<Otp>,
     private readonly jwt: JwtService,
     private readonly sms: SmsService,
+    private readonly abonnements: AbonnementsService,
   ) {}
 
   /** Inscription : crée le compte (non vérifié) et envoie un OTP par SMS. */
   async register(dto: RegisterDto) {
+    console.log("CALL!")
+    
     const existant = await this.users.findOne({
       where: [
         { telephone: dto.telephone },
@@ -47,6 +51,9 @@ export class AuthService {
       motDePasseHash: await bcrypt.hash(dto.motDePasse, 10),
     });
     await this.users.save(user);
+    // L'essai démarre dès l'inscription, ancré sur le serveur : réinstaller l'app
+    // ne le remet pas à zéro, et il faut un nouveau numéro vérifié pour en rouvrir un.
+    await this.abonnements.ouvrirEssai(user.id);
     await this.envoyerOtp(dto.telephone);
 
     return {
@@ -116,6 +123,7 @@ export class AuthService {
 
   /** Connexion par téléphone + mot de passe. */
   async login(dto: LoginDto) {
+    console.log("CALL!")
     const user = await this.users.findOne({
       where: { telephone: dto.telephone },
     });

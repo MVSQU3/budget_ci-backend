@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 import { Transaction } from "./entities/transaction.entity";
 import { Budget } from "./entities/budget.entity";
 import { SyncDto } from "./dto/sync.dto";
+import { AbonnementsService } from "../billing/abonnements.service";
 
 /**
  * Synchronisation offline-first :
@@ -17,6 +18,7 @@ export class SyncService {
     @InjectRepository(Transaction)
     private readonly txs: Repository<Transaction>,
     @InjectRepository(Budget) private readonly budgets: Repository<Budget>,
+    private readonly abonnements: AbonnementsService,
   ) {}
 
   async synchroniser(userId: string, dto: SyncDto) {
@@ -54,12 +56,15 @@ export class SyncService {
     }
 
     // 3. Renvoyer l'état complet (y compris tombstones, pour propager les suppressions)
-    const [transactions, tousBudgets] = await Promise.all([
+    //    ainsi qu'un jeton de licence frais : chaque sync repousse la tolérance hors ligne.
+    const [transactions, tousBudgets, abonnement] = await Promise.all([
       this.txs.find({ where: { userId }, order: { date: "DESC" } }),
       this.budgets.find({ where: { userId } }),
+      this.abonnements.etat(userId),
     ]);
 
     return {
+      abonnement,
       transactions: transactions.map((t) => ({
         id: t.id,
         type: t.type,

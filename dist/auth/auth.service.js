@@ -21,16 +21,19 @@ const bcrypt = require("bcrypt");
 const user_entity_1 = require("../users/user.entity");
 const otp_entity_1 = require("./entities/otp.entity");
 const sms_service_1 = require("../sms/sms.service");
+const abonnements_service_1 = require("../billing/abonnements.service");
 const OTP_VALIDITE_MINUTES = 5;
 const OTP_TENTATIVES_MAX = 5;
 let AuthService = class AuthService {
-    constructor(users, otps, jwt, sms) {
+    constructor(users, otps, jwt, sms, abonnements) {
         this.users = users;
         this.otps = otps;
         this.jwt = jwt;
         this.sms = sms;
+        this.abonnements = abonnements;
     }
     async register(dto) {
+        console.log("CALL!");
         const existant = await this.users.findOne({
             where: [
                 { telephone: dto.telephone },
@@ -48,6 +51,7 @@ let AuthService = class AuthService {
             motDePasseHash: await bcrypt.hash(dto.motDePasse, 10),
         });
         await this.users.save(user);
+        await this.abonnements.ouvrirEssai(user.id);
         await this.envoyerOtp(dto.telephone);
         return {
             message: "Compte créé. Un code de vérification a été envoyé par SMS.",
@@ -99,6 +103,7 @@ let AuthService = class AuthService {
         return this.emettreToken(user);
     }
     async login(dto) {
+        console.log("CALL!");
         const user = await this.users.findOne({
             where: { telephone: dto.telephone },
         });
@@ -133,6 +138,7 @@ exports.AuthService = AuthService = __decorate([
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         jwt_1.JwtService,
-        sms_service_1.SmsService])
+        sms_service_1.SmsService,
+        abonnements_service_1.AbonnementsService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

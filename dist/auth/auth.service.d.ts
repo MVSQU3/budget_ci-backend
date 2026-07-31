@@ -3,13 +3,15 @@ import { Repository } from "typeorm";
 import { User } from "../users/user.entity";
 import { Otp } from "./entities/otp.entity";
 import { SmsService } from "../sms/sms.service";
+import { AbonnementsService } from "../billing/abonnements.service";
 import { LoginDto, RegisterDto, VerifyOtpDto } from "./dto/auth.dto";
 export declare class AuthService {
     private readonly users;
     private readonly otps;
     private readonly jwt;
     private readonly sms;
-    constructor(users: Repository<User>, otps: Repository<Otp>, jwt: JwtService, sms: SmsService);
+    private readonly abonnements;
+    constructor(users: Repository<User>, otps: Repository<Otp>, jwt: JwtService, sms: SmsService, abonnements: AbonnementsService);
     register(dto: RegisterDto): Promise<{
         message: string;
     }>;

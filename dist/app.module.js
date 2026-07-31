@@ -11,8 +11,13 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
 const auth_module_1 = require("./auth/auth.module");
+const sync_module_1 = require("./sync/sync.module");
+const billing_module_1 = require("./billing/billing.module");
 const user_entity_1 = require("./users/user.entity");
 const otp_entity_1 = require("./auth/entities/otp.entity");
+const transaction_entity_1 = require("./sync/entities/transaction.entity");
+const budget_entity_1 = require("./sync/entities/budget.entity");
+const abonnement_entity_1 = require("./billing/entities/abonnement.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -29,11 +34,13 @@ exports.AppModule = AppModule = __decorate([
                     username: config.get("DATABASE_USER", "postgres"),
                     password: config.get("DATABASE_PASSWORD", "postgres"),
                     database: config.get("DATABASE_NAME", "budget_fcfa"),
-                    entities: [user_entity_1.User, otp_entity_1.Otp],
+                    entities: [user_entity_1.User, otp_entity_1.Otp, transaction_entity_1.Transaction, budget_entity_1.Budget, abonnement_entity_1.Abonnement],
                     synchronize: true,
                 }),
             }),
             auth_module_1.AuthModule,
+            sync_module_1.SyncModule,
+            billing_module_1.BillingModule,
         ],
     })
 ], AppModule);

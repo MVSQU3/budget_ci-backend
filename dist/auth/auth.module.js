@@ -18,12 +18,14 @@ const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
 const jwt_strategy_1 = require("./jwt.strategy");
 const sms_service_1 = require("../sms/sms.service");
+const billing_module_1 = require("../billing/billing.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            billing_module_1.BillingModule,
             typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, otp_entity_1.Otp]),
             passport_1.PassportModule,
             jwt_1.JwtModule.registerAsync({
