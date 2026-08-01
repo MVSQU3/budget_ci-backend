@@ -29,8 +29,6 @@ export class AuthService {
 
   /** Inscription : crée le compte (non vérifié) et envoie un OTP par SMS. */
   async register(dto: RegisterDto) {
-    console.log("CALL!")
-    
     const existant = await this.users.findOne({
       where: [
         { telephone: dto.telephone },
@@ -123,7 +121,6 @@ export class AuthService {
 
   /** Connexion par téléphone + mot de passe. */
   async login(dto: LoginDto) {
-    console.log("CALL!")
     const user = await this.users.findOne({
       where: { telephone: dto.telephone },
     });

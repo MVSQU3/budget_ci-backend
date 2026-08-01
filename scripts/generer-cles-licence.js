@@ -11,7 +11,7 @@
  * ⚠ Changer de paire invalide tous les jetons déjà émis : les clients devront
  *   se reconnecter une fois pour en obtenir un nouveau.
  */
-const nacl = require('tweetnacl');
+import nacl from 'tweetnacl';
 
 const paire = nacl.sign.keyPair();
 

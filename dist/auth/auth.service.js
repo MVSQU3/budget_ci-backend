@@ -33,7 +33,6 @@ let AuthService = class AuthService {
         this.abonnements = abonnements;
     }
     async register(dto) {
-        console.log("CALL!");
         const existant = await this.users.findOne({
             where: [
                 { telephone: dto.telephone },
@@ -103,7 +102,6 @@ let AuthService = class AuthService {
         return this.emettreToken(user);
     }
     async login(dto) {
-        console.log("CALL!");
         const user = await this.users.findOne({
             where: { telephone: dto.telephone },
         });

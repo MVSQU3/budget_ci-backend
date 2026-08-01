@@ -6,6 +6,8 @@ import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
  */
 @Entity('transactions')
 export class Transaction {
+  // Pas un uuid : l'id est forgé par le client hors ligne (base36 horodatée),
+  // ce qui lui permet de créer une transaction sans attendre le serveur.
   @PrimaryColumn()
   id: string;
 

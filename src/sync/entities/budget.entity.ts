@@ -3,8 +3,10 @@ import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 /** Budget mensuel d'une catégorie pour un utilisateur. */
 @Entity('budgets')
 export class Budget {
+  // Pas un uuid : clé composite lisible `${userId}:${categorieId}`,
+  // qui garantit un seul budget par catégorie et par utilisateur.
   @PrimaryColumn()
-  id: string; // `${userId}:${categorieId}`
+  id: string;
 
   @Index()
   @Column()

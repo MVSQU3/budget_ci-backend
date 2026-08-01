@@ -62,7 +62,17 @@ export class LicenceService implements OnModuleInit {
       );
     }
     this.clePrivee = new Uint8Array(brut);
-    this.logger.log('Clé de signature de licence chargée.');
+
+    // On affiche la clé publique attendue : si les deux moitiés de la paire
+    // divergent, l'app rejette les jetons avec un simple « signature invalide »
+    // et rien n'indique d'où vient le problème. Ici, la comparaison est immédiate.
+    const publique = Buffer.from(
+      nacl.sign.keyPair.fromSecretKey(this.clePrivee).publicKey,
+    ).toString('base64');
+    this.logger.log(
+      `Licence : clé de signature chargée. ` +
+        `CLE_PUBLIQUE_B64 attendue dans mobile/src/utils/licence.js : ${publique}`,
+    );
   }
 
   /** Statut réel à l'instant t : une période échue vaut expiration. */
