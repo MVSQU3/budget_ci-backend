@@ -4,11 +4,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "./auth/auth.module";
 import { SyncModule } from "./sync/sync.module";
 import { BillingModule } from "./billing/billing.module";
-import { User } from "./users/user.entity";
-import { Otp } from "./auth/entities/otp.entity";
-import { Transaction } from "./sync/entities/transaction.entity";
-import { Budget } from "./sync/entities/budget.entity";
-import { Abonnement } from "./billing/entities/abonnement.entity";
+import { ENTITES } from "./data-source";
+import { SchemaInitial1785841870130 } from "./migrations/1785841870130-SchemaInitial";
 
 @Module({
   imports: [
@@ -16,15 +13,28 @@ import { Abonnement } from "./billing/entities/abonnement.entity";
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: "postgres",
-        host: config.get("DATABASE_HOST", "localhost"),
-        port: parseInt(config.get("DATABASE_PORT", "5432"), 10),
-        username: config.get("DATABASE_USER", "postgres"),
-        password: config.get("DATABASE_PASSWORD", "postgres"),
-        database: config.get("DATABASE_NAME", "budget_fcfa"),
-        entities: [User, Otp, Transaction, Budget, Abonnement],
-        // synchronize: pratique en dev, à remplacer par des migrations en production
-        synchronize: true,
+        type: "postgres" as const,
+        host: config.get<string>("DATABASE_HOST", "localhost"),
+        port: parseInt(config.get<string>("DATABASE_PORT", "5432"), 10),
+        username: config.get<string>("DATABASE_USER", "postgres"),
+        password: config.get<string>("DATABASE_PASSWORD", "postgres"),
+        database: config.get<string>("DATABASE_NAME", "budget_fcfa"),
+        entities: ENTITES,
+
+        // Le schéma ne change plus que par migration relue et versionnée.
+        // `synchronize` comparait les entités à la base et corrigeait l'écart
+        // tout seul : une colonne renommée devenait un DROP suivi d'un ADD,
+        // et les données de la colonne partaient avec.
+        synchronize: false,
+
+        // Migrations listées explicitement plutôt que par glob : après
+        // compilation, un glob sur `dist` ne trouve rien et l'application
+        // démarre en croyant le schéma à jour.
+        migrations: [SchemaInitial1785841870130],
+
+        // Appliquées au démarrage : déployer le code suffit à mettre le
+        // schéma à niveau, sans étape manuelle qu'on peut oublier.
+        migrationsRun: true,
       }),
     }),
     AuthModule,

@@ -44,15 +44,33 @@ export class SyncService {
     for (const b of dto.budgets) {
       const id = `${userId}:${b.categorieId}`;
       const existant = await this.budgets.findOne({ where: { id } });
-      if (!existant || b.majLe > Number(existant.majLe)) {
+
+      // Fusion « dernière modification gagne » : une poussée plus ancienne
+      // que ce qu'on a déjà en base est ignorée.
+      if (existant && b.majLe <= Number(existant.majLe)) continue;
+
+      // Un montant nul vaut suppression, mais on garde la ligne à 0 au lieu de
+      // l'effacer : elle porte la date de suppression. Sans elle, un appareil
+      // resté en arrière repousserait l'ancien montant et le ressusciterait,
+      // puisqu'il n'y aurait plus rien à comparer. Elle n'est jamais renvoyée.
+      if (Math.round(b.montant) <= 0) {
         await this.budgets.save({
           id,
           userId,
           categorieId: b.categorieId,
-          montant: Math.round(b.montant),
+          montant: 0,
           majLe: b.majLe,
         });
+        continue;
       }
+
+      await this.budgets.save({
+        id,
+        userId,
+        categorieId: b.categorieId,
+        montant: Math.round(b.montant),
+        majLe: b.majLe,
+      });
     }
 
     // 3. Renvoyer l'état complet (y compris tombstones, pour propager les suppressions)
@@ -75,11 +93,15 @@ export class SyncService {
         supprime: t.supprime,
         majLe: Number(t.majLe),
       })),
-      budgets: tousBudgets.map((b) => ({
-        categorieId: b.categorieId,
-        montant: Number(b.montant),
-        majLe: Number(b.majLe),
-      })),
+      // Les lignes à 0 sont des marqueurs de suppression, internes au serveur :
+      // le client ne doit voir que les budgets réellement définis.
+      budgets: tousBudgets
+        .filter((b) => Number(b.montant) > 0)
+        .map((b) => ({
+          categorieId: b.categorieId,
+          montant: Number(b.montant),
+          majLe: Number(b.majLe),
+        })),
       syncLe: Date.now(),
     };
   }
